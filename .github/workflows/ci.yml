@@ -6,6 +6,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: booking_app
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 123456
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -16,5 +31,21 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..10}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "PostgreSQL is ready!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "PostgreSQL did not become ready in time."
+          exit 1
+
       - name: Build and verify
         run: mvn clean verify
+
+      - name: Run Liquibase update
+        run: mvn liquibase:update
