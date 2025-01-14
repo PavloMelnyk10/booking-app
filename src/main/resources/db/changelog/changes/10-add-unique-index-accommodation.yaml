@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-unique-index-accommodation
+      author: pavlo_melnyk
+      changes:
+        - addUniqueConstraint:
+            tableName: accommodations
+            columnNames: name, location
+            constraintName: unique_accommodation_name_location
