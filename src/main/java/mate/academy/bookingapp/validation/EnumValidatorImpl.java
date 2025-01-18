@@ -15,7 +15,7 @@ public class EnumValidatorImpl implements ConstraintValidator<EnumValidator, Cha
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
         if (value == null) {
-            return false;
+            return true;
         }
         return Arrays.stream(enumClass.getEnumConstants())
                 .anyMatch(enumValue -> enumValue.name().equalsIgnoreCase(value.toString()));

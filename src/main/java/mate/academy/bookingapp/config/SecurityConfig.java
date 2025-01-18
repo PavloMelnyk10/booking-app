@@ -3,6 +3,7 @@ package mate.academy.bookingapp.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import lombok.RequiredArgsConstructor;
+import mate.academy.bookingapp.security.CustomAuthenticationEntryPoint;
 import mate.academy.bookingapp.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         auth -> auth
@@ -45,11 +46,11 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**"
                                 ).permitAll()
-                                .requestMatchers(HttpMethod.GET, "/accommodations").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/accommodations/{id}").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/accommodations/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter,

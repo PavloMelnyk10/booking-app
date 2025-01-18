@@ -21,3 +21,12 @@ databaseChangeLog:
               - column:
                   name: name
                   value: "ADMIN"
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  value: "3"
+              - column:
+                  name: name
+                  value: "SUPER_ADMIN"

@@ -3,11 +3,10 @@ package mate.academy.bookingapp.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Objects;
-import mate.academy.bookingapp.dto.user.UserRegistrationRequestDto;
 import org.springframework.beans.BeanWrapperImpl;
 
 public class FieldMatchValidator implements
-        ConstraintValidator<FieldMatch, UserRegistrationRequestDto> {
+        ConstraintValidator<FieldMatch, Object> {
     private String firstFieldName;
     private String secondFieldName;
     private String message;
@@ -20,7 +19,7 @@ public class FieldMatchValidator implements
     }
 
     @Override
-    public boolean isValid(UserRegistrationRequestDto value, ConstraintValidatorContext context) {
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
