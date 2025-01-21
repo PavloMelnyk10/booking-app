@@ -82,6 +82,17 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<Object> handleInvalidOperationException(InvalidOperationException ex) {
+        Map<String, Object> body = createErrorBody(
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Operation",
+                List.of(ex.getMessage())
+        );
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
     private Map<String, Object> createErrorBody(int status, String error, List<String> messages) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());

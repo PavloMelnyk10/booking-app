@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = EnumValidatorImpl.class)
 public @interface EnumValidator {
-    String message() default "Invalid value";
+    String message() default "Invalid value. Allowed values: {enumClass}";
 
     Class<?>[] groups() default {};
 

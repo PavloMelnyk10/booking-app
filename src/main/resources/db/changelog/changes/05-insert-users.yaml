@@ -8,6 +8,21 @@ databaseChangeLog:
             columns:
               - column:
                   name: email
+                  value: "superadmin@bookingapp.com"
+              - column:
+                  name: password
+                  value: "$2a$10$kQ8SF280CkGWHG3pV6vJYeagCgXoLAWI0CnOIAL7cXuXs6mUgDq0G"
+              - column:
+                  name: first_name
+                  value: "Super Admin"
+              - column:
+                  name: last_name
+                  value: "Super Admin"
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
                   value: "admin@bookingapp.com"
               - column:
                   name: password
