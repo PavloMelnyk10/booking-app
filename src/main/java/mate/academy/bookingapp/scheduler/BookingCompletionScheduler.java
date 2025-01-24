@@ -10,17 +10,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class BookingExpirationScheduler {
+public class BookingCompletionScheduler {
     private final BookingRepository bookingRepository;
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 17 * * ?")
     @Transactional
-    public void expirePendingBookings() {
-        LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(15);
+    public void completeBookings() {
+        LocalDateTime today = LocalDateTime.now().toLocalDate().atStartOfDay();
 
-        bookingRepository.findPendingWithoutPaymentsBefore(cutoffTime)
+        bookingRepository.findAllByStatusAndCheckOutDate(
+                BookingStatus.CONFIRMED, today.toLocalDate())
                 .forEach(booking -> {
-                    booking.setStatus(BookingStatus.EXPIRED);
+                    booking.setStatus(BookingStatus.COMPLETED);
                     bookingRepository.save(booking);
                 });
     }
