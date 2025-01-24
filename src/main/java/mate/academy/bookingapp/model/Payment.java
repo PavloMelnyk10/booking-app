@@ -11,54 +11,45 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+@Entity
+@Table(name = "payments")
 @Getter
 @Setter
-@Entity
-@Table(name = "bookings")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@SQLDelete(sql = "UPDATE bookings SET is_deleted = TRUE WHERE id = ?")
+@SQLDelete(sql = "UPDATE payments SET is_deleted = TRUE WHERE id = ?")
 @SQLRestriction("is_deleted = FALSE")
-public class Booking {
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "check_in_date", nullable = false)
-    private LocalDate checkInDate;
-
-    @Column(name = "check_out_date", nullable = false)
-    private LocalDate checkOutDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accommodation_id", nullable = false)
-    @ToString.Exclude
-    private Accommodation accommodation;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude
-    private User user;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BookingStatus status;
+    private PaymentStatus status;
+
+    @Column(name = "session_url")
+    private String sessionUrl;
+
+    @Column(name = "session_id")
+    private String sessionId;
 
     @Column(nullable = false)
-    @ToString.Exclude
-    private boolean isDeleted;
+    private BigDecimal amount;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    private boolean isDeleted = false;
 }

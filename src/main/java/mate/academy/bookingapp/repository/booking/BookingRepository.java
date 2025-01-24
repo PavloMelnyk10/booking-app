@@ -2,14 +2,13 @@ package mate.academy.bookingapp.repository.booking;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import mate.academy.bookingapp.model.Booking;
 import mate.academy.bookingapp.model.BookingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT COUNT(b) FROM Booking b "
@@ -37,15 +36,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findAllByUserIdAndStatus(Long userId, BookingStatus status, Pageable pageable);
 
-    @Modifying
+    List<Booking> findAllByStatusAndCheckOutDate(BookingStatus bookingStatus,
+                                                 LocalDate checkOutDate);
+
     @Query("""
-        UPDATE Booking b
-           SET b.status = :newStatus
-         WHERE b.status = :oldStatus
-           AND b.createdAt < :cutoffTime
-           AND b.isDeleted = false
+    SELECT b FROM Booking b
+    WHERE b.status = 'PENDING'
+      AND b.createdAt < :cutoffTime
+      AND NOT EXISTS (
+          SELECT p FROM Payment p
+          WHERE p.booking.id = b.id AND p.status = 'PENDING'
+      )
             """)
-    void expireOldBookings(@Param("newStatus") BookingStatus newStatus,
-                          @Param("oldStatus") BookingStatus oldStatus,
-                          @Param("cutoffTime") LocalDateTime cutoffTime);
+    List<Booking> findPendingWithoutPaymentsBefore(LocalDateTime cutoffTime);
+
 }
