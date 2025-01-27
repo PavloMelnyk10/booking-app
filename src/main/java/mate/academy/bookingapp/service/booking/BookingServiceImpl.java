@@ -117,7 +117,8 @@ public class BookingServiceImpl implements BookingService {
         accessControlService.validateBookingOwnership(bookingId);
 
         if (booking.getStatus() == BookingStatus.CANCELLED
-                || booking.getStatus() == BookingStatus.EXPIRED) {
+                || booking.getStatus() == BookingStatus.EXPIRED
+                || booking.getStatus() == BookingStatus.COMPLETED) {
             throw new IllegalStateException(
                     "Booking cannot be canceled as it is already " + booking.getStatus()
             );

@@ -53,6 +53,9 @@ public class User implements UserDetails {
     @ToString.Exclude
     private boolean isDeleted;
 
+    @Column(nullable = false)
+    private int completedBookings = 0;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",

@@ -117,6 +117,18 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
+        Map<String, Object> body = createErrorBody(
+                HttpStatus.BAD_REQUEST.value(),
+                "error",
+                List.of(ex.getMessage())
+        );
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
     private Map<String, Object> createErrorBody(int status, String error, List<String> messages) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
