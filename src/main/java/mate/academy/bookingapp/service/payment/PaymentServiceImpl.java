@@ -1,5 +1,9 @@
 package mate.academy.bookingapp.service.payment;
 
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildPaymentCanceledMessages;
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildPaymentCreatedMessage;
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildPaymentSuccessMessages;
+
 import com.stripe.model.checkout.Session;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
@@ -14,6 +18,8 @@ import mate.academy.bookingapp.model.User;
 import mate.academy.bookingapp.repository.booking.BookingRepository;
 import mate.academy.bookingapp.repository.payment.PaymentRepository;
 import mate.academy.bookingapp.service.accesscontrol.AccessControlService;
+import mate.academy.bookingapp.service.notification.MessageBuilder;
+import mate.academy.bookingapp.service.notification.TelegramNotificationService;
 import mate.academy.bookingapp.service.user.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final AccessControlService accessControlService;
     private final PaymentValidationService paymentValidationService;
     private final StripeService stripeService;
+    private final TelegramNotificationService notificationService;
 
     @Override
     public PaymentDto createPaymentSession(final Long bookingId,
@@ -53,6 +60,8 @@ public class PaymentServiceImpl implements PaymentService {
         booking.setCreatedAt(payment.getCreatedAt());
         bookingRepository.save(booking);
 
+        notificationService.sendPaymentMessage(buildPaymentCreatedMessage(payment, totalAmount));
+
         return paymentMapper.toDto(payment);
     }
 
@@ -70,6 +79,11 @@ public class PaymentServiceImpl implements PaymentService {
                 booking.setStatus(BookingStatus.CONFIRMED);
             }
             paymentRepository.save(payment);
+
+            MessageBuilder.PaymentMessagesDto messages = buildPaymentSuccessMessages(payment);
+            notificationService.sendPaymentMessage(messages.paymentMessage());
+            notificationService.sendBookingMessage(messages.bookingMessage());
+
             return "Payment successfully completed for session: " + sessionId;
         }
 
@@ -89,6 +103,10 @@ public class PaymentServiceImpl implements PaymentService {
         if (booking.getStatus() == BookingStatus.PENDING) {
             booking.setStatus(BookingStatus.EXPIRED);
         }
+
+        MessageBuilder.PaymentMessagesDto messages = buildPaymentCanceledMessages(payment);
+        notificationService.sendPaymentMessage(messages.paymentMessage());
+        notificationService.sendBookingMessage(messages.bookingMessage());
 
         bookingRepository.save(booking);
         return "Payment session with ID " + sessionId

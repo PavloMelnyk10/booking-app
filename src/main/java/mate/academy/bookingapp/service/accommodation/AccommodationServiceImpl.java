@@ -1,5 +1,9 @@
 package mate.academy.bookingapp.service.accommodation;
 
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildAccommodationCreatedMessage;
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildAccommodationDeletedMessage;
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildAccommodationUpdatedMessage;
+
 import jakarta.transaction.Transactional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +18,7 @@ import mate.academy.bookingapp.model.Accommodation;
 import mate.academy.bookingapp.model.Amenity;
 import mate.academy.bookingapp.repository.accommodation.AccommodationRepository;
 import mate.academy.bookingapp.service.amenity.AmenityService;
+import mate.academy.bookingapp.service.notification.TelegramNotificationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ public class AccommodationServiceImpl implements AccommodationService {
     private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
     private final AmenityService amenityService;
+    private final TelegramNotificationService notificationService;
 
     @Override
     @Transactional
@@ -40,7 +46,12 @@ public class AccommodationServiceImpl implements AccommodationService {
         Set<Amenity> amenities = amenityService.findOrCreateByNames(requestDto.getAmenities());
         accommodation.setAmenities(amenities);
 
-        return accommodationMapper.toDto(accommodationRepository.save(accommodation));
+        Accommodation savedAccommodation = accommodationRepository.save(accommodation);
+
+        notificationService.sendAccommodationMessage(
+                buildAccommodationCreatedMessage(savedAccommodation));
+
+        return accommodationMapper.toDto(savedAccommodation);
     }
 
     @Override
@@ -61,6 +72,9 @@ public class AccommodationServiceImpl implements AccommodationService {
             Set<Amenity> amenities = amenityService.findOrCreateByNames(requestDto.getAmenities());
             accommodation.setAmenities(amenities);
         }
+
+        notificationService.sendAccommodationMessage(
+                buildAccommodationUpdatedMessage(accommodation));
 
         return accommodationMapper.toDto(accommodationRepository.save(accommodation));
     }
@@ -86,6 +100,9 @@ public class AccommodationServiceImpl implements AccommodationService {
         );
 
         accommodation.setDeleted(true);
+
+        notificationService.sendAccommodationMessage(
+                buildAccommodationDeletedMessage(accommodation));
 
         accommodationRepository.save(accommodation);
     }
