@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-completed-bookings-column-to-users
+      author: pavlo_melnyk
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: completed_bookings
+                  type: INT
+                  defaultValue: 0
+                  constraints:
+                    nullable: false

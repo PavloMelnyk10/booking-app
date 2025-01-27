@@ -13,12 +13,15 @@ import mate.academy.bookingapp.model.User;
 import mate.academy.bookingapp.repository.booking.BookingRepository;
 import mate.academy.bookingapp.repository.payment.PaymentRepository;
 import mate.academy.bookingapp.repository.user.UserRepository;
+import mate.academy.bookingapp.service.discount.DiscountStrategy;
+import mate.academy.bookingapp.service.discount.DiscountStrategyFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentValidationService {
     private final UserRepository userRepository;
+    private final DiscountStrategyFactory discountStrategyFactory;
 
     public Booking getBookingOrThrow(final Long bookingId,
                                      final BookingRepository bookingRepository) {
@@ -71,12 +74,21 @@ public class PaymentValidationService {
                     "Invalid booking dates: check-out must be after check-in");
         }
 
-        return booking.getAccommodation().getDailyRate().multiply(BigDecimal.valueOf(days));
+        BigDecimal basePrice = booking.getAccommodation()
+                .getDailyRate().multiply(BigDecimal.valueOf(days));
+
+        return basePrice.subtract(getDiscount(booking, basePrice));
     }
 
     public boolean isAdminOrSuperAdmin(final User user) {
         return user.getRoles().stream()
                 .anyMatch(role -> role.getName() == Role.RoleName.ADMIN
                         || role.getName() == Role.RoleName.SUPER_ADMIN);
+    }
+
+    private BigDecimal getDiscount(Booking booking, BigDecimal basePrice) {
+        DiscountStrategy strategy = discountStrategyFactory
+                .getStrategy(booking.getUser().getCompletedBookings());
+        return strategy.calculateDiscount(basePrice, booking.getUser().getCompletedBookings());
     }
 }
