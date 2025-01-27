@@ -1,5 +1,9 @@
 package mate.academy.bookingapp.service.booking;
 
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildBookingCancelledMessage;
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildBookingCreatedMessage;
+import static mate.academy.bookingapp.service.notification.MessageBuilder.buildBookingUpdatedMessage;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import mate.academy.bookingapp.dto.booking.BookingDto;
@@ -12,6 +16,7 @@ import mate.academy.bookingapp.model.BookingStatus;
 import mate.academy.bookingapp.model.User;
 import mate.academy.bookingapp.repository.booking.BookingRepository;
 import mate.academy.bookingapp.service.accesscontrol.AccessControlService;
+import mate.academy.bookingapp.service.notification.TelegramNotificationService;
 import mate.academy.bookingapp.service.user.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +31,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final AccessControlService accessControlService;
     private final BookingValidationService bookingValidationService;
+    private final TelegramNotificationService notificationService;
 
     @Override
     public BookingDto createBooking(final CreateBookingRequestDto requestDto) {
@@ -45,6 +51,9 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.PENDING);
 
         Booking savedBooking = bookingRepository.save(booking);
+
+        notificationService.sendBookingMessage(buildBookingCreatedMessage(savedBooking));
+
         return bookingMapper.toDto(savedBooking);
     }
 
@@ -93,6 +102,8 @@ public class BookingServiceImpl implements BookingService {
                 booking.getId()
         );
 
+        notificationService.sendBookingMessage(buildBookingUpdatedMessage(booking, requestDto));
+
         booking.setCheckInDate(requestDto.getCheckInDate());
         booking.setCheckOutDate(requestDto.getCheckOutDate());
 
@@ -113,6 +124,9 @@ public class BookingServiceImpl implements BookingService {
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
+
+        notificationService.sendBookingMessage(buildBookingCancelledMessage(booking));
+
         bookingRepository.save(booking);
     }
 }
