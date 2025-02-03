@@ -9,9 +9,11 @@ import mate.academy.bookingapp.dto.booking.CreateBookingRequestDto;
 import mate.academy.bookingapp.dto.booking.UpdateBookingRequestDto;
 import mate.academy.bookingapp.model.BookingStatus;
 import mate.academy.bookingapp.service.booking.BookingService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,8 +46,9 @@ public class BookingController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @Operation(summary = "Get current user's bookings",
             description = "Retrieves all bookings for the currently logged-in user")
-    public Page<BookingDto> getCurrentUserBookings(Pageable pageable) {
-        return bookingService.getCurrentUserBookings(pageable);
+    public ResponseEntity<Page<BookingDto>> getCurrentUserBookings(
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(bookingService.getCurrentUserBookings(pageable));
     }
 
     @GetMapping
@@ -53,9 +56,10 @@ public class BookingController {
     @Operation(summary = "Get bookings by user and status",
             description = "Retrieves bookings filtered by user ID "
                     + "and booking status (Admins-only endpoint)")
-    public Page<BookingDto> getBookingsByUserAndStatus(
-            @RequestParam Long userId, @RequestParam BookingStatus status, Pageable pageable) {
-        return bookingService.findByUserIdAndStatus(userId, status, pageable);
+    public ResponseEntity<Page<BookingDto>> getBookingsByUserAndStatus(
+            @RequestParam Long userId, @RequestParam BookingStatus status,
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(bookingService.findByUserIdAndStatus(userId, status, pageable));
     }
 
     @GetMapping("/{id}")
