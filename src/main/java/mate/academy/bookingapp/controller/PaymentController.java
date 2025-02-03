@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import mate.academy.bookingapp.dto.payment.PaymentDto;
 import mate.academy.bookingapp.service.payment.PaymentService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,24 +74,25 @@ public class PaymentController {
     @Operation(summary = "Get current user's payments",
             description = "Retrieve a paginated list of payments for "
                     + "the currently authenticated user.")
-    public Page<PaymentDto> getCurrentUserPayments(Pageable pageable) {
-        return paymentService.getCurrentUserPayments(pageable);
+    public ResponseEntity<Page<PaymentDto>> getCurrentUserPayments(
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(paymentService.getCurrentUserPayments(pageable));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get payments by user ID",
             description = "Retrieve a paginated list of payments for a specific user. Admins only.")
-    public Page<PaymentDto> getPaymentsByUserId(
-            @RequestParam("userId") Long userId, Pageable pageable) {
-        return paymentService.findAllByUserId(userId, pageable);
+    public ResponseEntity<Page<PaymentDto>> getPaymentsByUserId(
+            @RequestParam("userId") Long userId, @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(paymentService.findAllByUserId(userId, pageable));
     }
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get all payments",
             description = "Retrieve a paginated list of all payments. Admins only.")
-    public Page<PaymentDto> getAllPayments(Pageable pageable) {
-        return paymentService.getAllPayments(pageable);
+    public ResponseEntity<Page<PaymentDto>> getAllPayments(Pageable pageable) {
+        return ResponseEntity.ok(paymentService.getAllPayments(pageable));
     }
 }

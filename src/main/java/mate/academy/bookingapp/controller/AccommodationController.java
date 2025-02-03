@@ -9,9 +9,11 @@ import mate.academy.bookingapp.dto.accommodation.AccommodationSummaryDto;
 import mate.academy.bookingapp.dto.accommodation.CreateAccommodationRequestDto;
 import mate.academy.bookingapp.dto.accommodation.UpdateAccommodationRequestDto;
 import mate.academy.bookingapp.service.accommodation.AccommodationService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,11 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccommodationController {
     private final AccommodationService accommodationService;
 
-    @GetMapping
-    @Operation(summary = "Get all accommodations",
-            description = "Retrieve a paginated list of all available accommodations")
-    public Page<AccommodationSummaryDto> getAllAccommodations(Pageable pageable) {
-        return accommodationService.findAll(pageable);
+    @GetMapping("/accommodations")
+    public ResponseEntity<Page<AccommodationSummaryDto>> getAllAccommodations(
+            @ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(accommodationService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
