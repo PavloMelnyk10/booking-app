@@ -25,6 +25,7 @@ public class BookingCompletionScheduler {
         bookingRepository.findAllByStatusAndCheckOutDate(
                         BookingStatus.CONFIRMED, today.toLocalDate())
                 .forEach(booking -> {
+                    booking.getUser().setCompletedBookings(booking.getUser().getCompletedBookings() + 1);
                     booking.setStatus(BookingStatus.COMPLETED);
                     bookingRepository.save(booking);
 
