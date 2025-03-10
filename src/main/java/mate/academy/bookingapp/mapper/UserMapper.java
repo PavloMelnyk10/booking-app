@@ -17,6 +17,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "completedBookings", ignore = true)
     User toModel(UserRegistrationRequestDto dto);
 
     UserResponseDto toUserResponse(User user);
@@ -25,6 +26,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "completedBookings", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateUserFromDto(UpdateUserRequestDto dto, @MappingTarget User user);
 }
