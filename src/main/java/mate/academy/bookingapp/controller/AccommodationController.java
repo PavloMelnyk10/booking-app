@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccommodationController {
     private final AccommodationService accommodationService;
 
-    @GetMapping("/accommodations")
+    @GetMapping("/")
     public ResponseEntity<Page<AccommodationSummaryDto>> getAllAccommodations(
             @ParameterObject Pageable pageable) {
         return ResponseEntity.ok(accommodationService.findAll(pageable));
